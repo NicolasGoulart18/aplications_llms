@@ -1,22 +1,38 @@
-import os #pacote do SO
-from dotenv import load_dotenv #pacote para ler as variáveis de ambiente do arquivo .env (variavel da chave de api)
-from openai import OpenAI #pacote para acessar a API da OpenAI
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
 
-load_dotenv() # lendo as variaveis de ambiente do arquivo .env
+load_dotenv()  # Carrega as variáveis do arquivo .env
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) # OpenAI-> metodo que vai contruir o cliente, e informo que a api key é aquel que esta no sistema operacionala, carregado no arquivo .env
-MODELO = "gpt-5.5-pro"
+chave_api = os.getenv("GEMINI_API_KEY")
+if not chave_api:
+    raise RuntimeError("Defina GEMINI_API_KEY no arquivo .env.")
+
+# A biblioteca OpenAI envia as requisições para a API compatível do Gemini.
+client = OpenAI(
+    api_key=chave_api,
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+)
+MODELO = "gemini-3.8-flash"
+
 
 def testar_conexao():
-    resposta = client.responses.create(
+    resposta = client.chat.completions.create(
         model=MODELO,
-        input= "Responda com 'Conexão bem sucedida!' para testar a conexão com a API da OpenAI."
+        messages=[
+            {
+                "role": "user",
+                "content": "Responda com 'Conexão bem sucedida!' para testar a conexão com a API do Gemini.",
+            }
+        ],
     )
-    return resposta.output_text
+    return resposta.choices[0].message.content
+
 
 def main():
-    print("Testando a conexão com a API da OpenAI...")
+    print("Testando a conexão com a API do Gemini...")
     print(testar_conexao())
+
 
 if __name__ == "__main__":
     main()
